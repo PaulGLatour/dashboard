@@ -21,12 +21,12 @@ if(!is_dir($astrundir) || !is_writable($astrundir)) {
 $lockfile = $astrundir."/scheduler.lock";
 
 // Sleep to fix crazy issues with large VM hosting providers
-sleep(mt_rand(1,30));
+//sleep(mt_rand(1,30));
 
 // Create a lock to make sure no more than one instance of this
 // program can be running on a machine at a time
 $fh = fopen($lockfile, "a");
-if (!$fh || !flock($fh, LOCK_EX|LOCK_NB)) {
+if ($fh !== FALSE && flock($fh, LOCK_EX|LOCK_NB) === TRUE) {
 	// Unable to lock, we're already running.
 	exit;
 }
