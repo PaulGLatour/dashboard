@@ -28,10 +28,10 @@ $lockfile = $astrundir."/scheduler.lock";
 // Create a lock to make sure no more than one instance of this
 // program can be running on a machine at a time
 $fh = (fopen($lockfile,'ab');
-if ( ($fh !== FALSE || $fh !== null) && !flock($fh, LOCK_EX) ) {
+if ( ($fh !== FALSE || $fh !== null) && !flock($fh, LOCK_EX|LOCK_NB) ) {
         // Unable to lock, we're already running.
         exit;
-}       else if(flock($fh, LOCK_EX) === TRUE)
+}       else
         {
 
                 if(!$astman->connected()){
@@ -43,6 +43,7 @@ if ( ($fh !== FALSE || $fh !== null) && !flock($fh, LOCK_EX) ) {
 
                 // remove lockfile, and then close handle to release kernel lock
                 flock($fh, LOCK_UN);
+		fflush($fh);
                 unlink($lockfile);
                 fclose($fh);
 	}
