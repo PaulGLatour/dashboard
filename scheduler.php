@@ -25,17 +25,24 @@ $lockfile = $astrundir."/scheduler.lock";
 
 // Create a lock to make sure no more than one instance of this
 // program can be running on a machine at a time
-$fh = fopen($lockfile, "a");
-if ($fh !== FALSE && flock($fh, LOCK_EX|LOCK_NB) === TRUE) {
-	// Unable to lock, we're already running.
-	exit;
-}
-if(!$astman->connected()){
-	exit;
-}
-// Run the trigger
-\FreePBX::Dashboard()->runTrigger();
+// Create a lock to make sure no more than one instance of this
+// program can be running on a machine at a time
+$fh = (fopen($lockfile,'ab');
+if ( ($fh !== FALSE || $fh !== null) && !flock($fh, LOCK_EX) ) {
+        // Unable to lock, we're already running.
+        exit;
+}       else if(flock($fh, LOCK_EX) === TRUE)
+        {
 
-// remove lockfile, and then close handle to release kernel lock
-unlink($lockfile);
-fclose($fh);
+                if(!$astman->connected()){
+                        exit;
+                }
+
+                // Run the trigger
+                \FreePBX::Dashboard()->runTrigger();
+
+                // remove lockfile, and then close handle to release kernel lock
+                flock($fh, LOCK_UN);
+                unlink($lockfile);
+                fclose($fh);
+	}
